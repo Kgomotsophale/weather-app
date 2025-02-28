@@ -4,52 +4,52 @@ import "./App.css";
 
 const API_KEY = "2a2d3781d11f2f8ba38a2a3338227f1c";
 
-const App = () => {
+function App() {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
+  const [error, setError] = useState("");
 
-  const fetchWeather = async (cityName) => {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${API_KEY}`;
+  const fetchWeather = async () => {
+    if (!city) return;
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`
+      );
       setWeather(response.data);
-    } catch (error) {
-      alert("City not found. Please try again.");
+      setError("");
+    } catch (err) {
+      setError("City not found. Try again.");
+      setWeather(null);
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (city) fetchWeather(city);
-  };
-
   return (
-    <div className="weather-container">
-      <h1>SheCodes</h1>
-      <form onSubmit={handleSearch}>
+    <div className="container">
+      <h1>Weather App</h1>
+      <div className="search-box">
         <input
           type="text"
-          placeholder="Enter a city.."
+          placeholder="Enter city name"
           value={city}
           onChange={(e) => setCity(e.target.value)}
         />
-        <button type="submit">Search</button>
-      </form>
+        <button onClick={fetchWeather}>Search</button>
+      </div>
+
+      {error && <p className="error">{error}</p>}
 
       {weather && (
-        <div className="weather-info">
-          <h2>{weather.name}</h2>
-          <p>
-            {new Date().toLocaleString()}, {weather.weather[0].description}
-          </p>
-          <p>
-            Humidity: {weather.main.humidity}% | Wind: {weather.wind.speed} km/h
-          </p>
-          <h1>{Math.round(weather.main.temp)}°C</h1>
+        <div className="weather-box">
+          <h2>
+            {weather.name}, {weather.sys.country}
+          </h2>
+          <p>Temperature: {Math.round(weather.main.temp)}°C</p>
+          <p>Humidity: {weather.main.humidity}%</p>
+          <p>Wind Speed: {weather.wind.speed} m/s</p>
         </div>
       )}
     </div>
   );
-};
+}
 
 export default App;
